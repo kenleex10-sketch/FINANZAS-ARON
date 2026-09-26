@@ -1,0 +1,8 @@
+FINANZAS DE ARON BEJARANO — PWA
+
+1. Publica esta carpeta en HTTPS.
+2. Abre la dirección en Chrome de la tablet.
+3. Menú ⋮ → Agregar a pantalla principal / Instalar aplicación.
+4. Confirma.
+
+La app guarda sus datos localmente. No borres los datos del sitio y usa los respaldos de la app cuando corresponda.

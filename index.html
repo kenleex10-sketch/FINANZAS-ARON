@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5367d8"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>Finanzas de Aron Bejarano</title>
+<style>
+:root{--a:#5367d8;--bg:#f5f6fa;--text:#172033;--muted:#6b7280;--line:#e2e5ec;--card:#fff;--green:#258d78;--red:#c95d75}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:1100px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--muted)}h1{font-size:28px;margin:4px 0}.sub{font-size:13px;color:var(--muted)}
+button{min-height:44px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;font-weight:750;color:var(--text);cursor:pointer}.primary{background:var(--a);border-color:var(--a);color:#fff}
+nav{display:flex;gap:7px;overflow:auto;padding:14px 0}nav button.active{background:var(--a);color:#fff}
+.screen{display:none}.screen.active{display:block}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}.label{font-size:11px;color:var(--muted);font-weight:800}.value{font-size:24px;font-weight:850;margin-top:6px}.small{font-size:11px;color:var(--muted);margin-top:5px}
+.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:12px;margin-top:12px}.head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.head h2{font-size:16px;margin:0}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #edf0f4}.row:last-child{border:0}.name{font-size:13px;font-weight:750}.meta{font-size:11px;color:var(--muted);margin-top:3px}.amt{font-size:13px;font-weight:850}.in{color:var(--green)}.out{color:var(--red)}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}.form input,.form select{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:14px}.form button{grid-column:1/-1}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.notice{background:#e9edff;border-radius:13px;padding:12px;font-size:12px;line-height:1.45;margin-top:12px}.progress{height:9px;background:#e9ebf0;border-radius:99px;overflow:hidden;margin-top:7px}.fill{height:100%;background:var(--a)}.goal{padding:11px 0;border-bottom:1px solid var(--line)}.goal:last-child{border:0}.goalhead{display:flex;justify-content:space-between;font-size:13px;font-weight:750}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select{padding:11px;border:1px solid var(--line);border-radius:11px;background:#fff}
+.empty{text-align:center;color:var(--muted);padding:28px}.danger{color:#b23d58}
+@media(max-width:760px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.app{padding:13px}}
+</style></head><body><div class="app">
+<header><div><div class="eyebrow">FINANZAS PERSONALES</div><h1>Hola, Aron Bejarano 👋</h1><div class="sub">Control financiero personal · datos guardados en este dispositivo</div></div><button class="primary" onclick="openMove()">＋ Movimiento</button></header>
+<nav id="nav"><button class="active" data-screen="inicio">🏠 Inicio</button><button data-screen="movimientos">💸 Movimientos</button><button data-screen="cuentas">🏦 Cuentas</button><button data-screen="tarjetas">💳 Tarjetas</button><button data-screen="metas">🎯 Metas</button><button data-screen="calendario">📅 Calendario</button><button data-screen="reportes">📊 Reportes</button><button data-screen="ajustes">⚙️ Datos</button></nav>
+
+<section id="inicio" class="screen active">
+<div class="cards"><div class="card"><div class="label">SALDO TOTAL</div><div class="value" id="dashBalance">₡0</div><div class="small">Cuentas + efectivo − deuda de tarjetas</div></div><div class="card"><div class="label">INGRESOS DEL MES</div><div class="value" id="dashIncome">₡0</div></div><div class="card"><div class="label">GASTOS DEL MES</div><div class="value" id="dashExpense">₡0</div></div><div class="card"><div class="label">AHORRO DEL MES</div><div class="value" id="dashSaving">₡0</div></div></div>
+<div class="grid"><div class="panel"><div class="head"><h2>Movimientos recientes</h2><button onclick="go('movimientos')">Ver todos</button></div><div id="recent"></div></div>
+<div class="panel"><div class="head"><h2>Resumen</h2></div><div class="notice"><b>📌 Estado financiero</b><br><span id="summary">Registra tus primeros movimientos para comenzar.</span></div><div style="margin-top:15px"><div class="head"><h2>Metas</h2></div><div id="goalMini"></div></div></div></div>
+</section>
+
+<section id="movimientos" class="screen"><div class="panel"><div class="head"><h2>💸 Movimientos</h2><button class="primary" onclick="openMove()">＋ Registrar</button></div>
+<div class="notice" style="margin-bottom:12px"><b>Registros editables</b><br>Los movimientos de ejemplo son reales dentro de la app: puedes editarlos o eliminarlos. Los cambios actualizan los saldos.</div><div class="toolbar"><input id="search" placeholder="Buscar..." oninput="renderMoves()"><select id="filterType" onchange="renderMoves()"><option value="">Todos</option><option value="income">Ingresos</option><option value="expense">Gastos</option></select></div><div id="moves"></div></div></section>
+
+<section id="cuentas" class="screen"><div class="panel"><div class="head"><h2>🏦 Cuentas</h2><button class="primary" onclick="openAccount()">＋ Cuenta</button></div><div id="accounts"></div></div></section>
+
+<section id="tarjetas" class="screen"><div class="panel"><div class="head"><h2>💳 Tarjetas</h2><button class="primary" onclick="openCard()">＋ Tarjeta</button></div><div id="cardsList"></div></div></section>
+
+<section id="metas" class="screen"><div class="panel"><div class="head"><h2>🎯 Metas de ahorro</h2><button class="primary" onclick="openGoal()">＋ Meta</button></div><div id="goals"></div></div></section>
+
+<section id="calendario" class="screen"><div class="panel"><div class="head"><h2>📅 Próximos pagos</h2><button class="primary" onclick="openPayment()">＋ Pago</button></div><div id="payments"></div></div></section>
+
+<section id="reportes" class="screen"><div class="panel"><div class="head"><h2>📊 Reportes</h2></div><div class="cards"><div class="card"><div class="label">INGRESOS TOTALES</div><div class="value" id="repIncome">₡0</div></div><div class="card"><div class="label">GASTOS TOTALES</div><div class="value" id="repExpense">₡0</div></div></div><div style="margin-top:15px" id="categories"></div></div></section>
+
+<section id="ajustes" class="screen"><div class="panel"><div class="head"><h2>⚙️ Datos y respaldo</h2></div><p class="small">Los datos se guardan localmente en el navegador de esta tablet.</p><div class="actions"><button onclick="exportData()">⬇️ Respaldar datos</button><button onclick="document.getElementById('importFile').click()">⬆️ Restaurar respaldo</button><button onclick="resetData()" class="danger">🗑️ Borrar todos los datos</button></div><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"><div class="notice"><b>Perfil</b><br>Aron Bejarano<br><span class="small">Puedes usar la app sin Internet una vez cargada.</span></div></div></section>
+
+<dialog id="dlg"><form method="dialog" id="dlgForm" class="panel" style="min-width:min(92vw,520px)"><div class="head"><h2 id="dlgTitle">Nuevo</h2><button value="cancel">✕</button></div><div id="dlgBody"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button value="cancel">Cancelar</button><button class="primary" value="default" id="dlgSave">Guardar</button></div></form></dialog>
+</div>
+<script>
+const KEY='finanzas_aron_v4';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{
+profile:{name:'Aron Bejarano'},
+accounts:[
+{id:1,name:'Cuenta principal',openingBalance:875800},
+{id:2,name:'Cuenta de ahorro',openingBalance:320000},
+{id:3,name:'Efectivo',openingBalance:50000}
+],
+cards:[{id:10,name:'Tarjeta principal',limit:300000,balance:0,cut:'15',pay:'30'}],
+moves:[
+{id:1001,desc:'Salario',amount:650000,type:'income',category:'Salario',sourceType:'account',sourceId:1,sourceName:'Cuenta principal',date:'2026-09-01',created:1001},
+{id:1002,desc:'Supermercado',amount:48500,type:'expense',category:'Alimentación',sourceType:'card',sourceId:10,sourceName:'Tarjeta principal',date:'2026-09-05',created:1002},
+{id:1003,desc:'Gasolina',amount:25000,type:'expense',category:'Transporte',sourceType:'account',sourceId:1,sourceName:'Cuenta principal',date:'2026-09-08',created:1003},
+{id:1004,desc:'Internet',amount:25000,type:'expense',category:'Casa',sourceType:'account',sourceId:1,sourceName:'Cuenta principal',date:'2026-09-10',created:1004}
+],
+goals:[{id:2001,name:'Fondo de emergencia',target:500000,saved:340000}],
+payments:[{id:3001,name:'Internet',amount:25000,date:'2026-09-30'}]
+};
+// Normaliza datos para evitar registros corruptos o estructuras antiguas.
+if(!Array.isArray(db.accounts))db.accounts=[];
+if(!Array.isArray(db.cards))db.cards=[];
+if(!Array.isArray(db.moves))db.moves=[];
+if(!Array.isArray(db.goals))db.goals=[];
+if(!Array.isArray(db.payments))db.payments=[];
+db.accounts.forEach(a=>{if(a.openingBalance===undefined)a.openingBalance=Number(a.balance)||0;});
+db.moves.forEach(m=>{if(!m.sourceType)m.sourceType='account'; if(m.sourceId===undefined){let a=db.accounts.find(x=>x.name===m.accountName||x.name===m.sourceName);if(a){m.sourceId=a.id;m.sourceName=a.name;}else{m.sourceId=0;m.sourceName=m.accountName||'Sin cuenta';}}});
+
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+const money=n=>'₡'+Math.round(Number(n)||0).toLocaleString('es-CR');
+function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));renderAll();scrollTo(0,0)}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.screen));
+function monthMoves(){let now=new Date(),m=now.getMonth(),y=now.getFullYear();return db.moves.filter(x=>{let d=new Date(x.date);return d.getMonth()===m&&d.getFullYear()===y})}
+function totals(){let mm=monthMoves(),inc=mm.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),exp=mm.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0),accounts=db.accounts.reduce((a,x)=>a+x.balance,0),debt=db.cards.reduce((a,x)=>a+x.balance,0);return{inc,exp,save:inc-exp,balance:accounts-debt}}
+function renderAll(){let t=totals();$('dashBalance').textContent=money(t.balance);$('dashIncome').textContent=money(t.inc);$('dashExpense').textContent=money(t.exp);$('dashSaving').textContent=money(t.save);$('repIncome').textContent=money(db.moves.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0));$('repExpense').textContent=money(db.moves.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0));$('summary').textContent=t.inc||t.exp?`Este mes: ${money(t.inc)} de ingresos y ${money(t.exp)} de gastos. Ahorro: ${money(t.save)}.`:'Registra tus primeros movimientos para comenzar.';renderRecent();renderMoves();renderAccounts();renderCards();renderGoals();renderPayments();renderCategories()}
+function renderRecent(){$('recent').innerHTML=db.moves.slice().sort((a,b)=>b.created-a.created).slice(0,6).map(x=>`<div class="row"><div><div class="name">${esc(x.desc)}</div><div class="meta">${esc(x.category)} · ${esc(x.sourceName||x.accountName||'Sin cuenta')}</div></div><div class="amt ${x.type==='income'?'in':'out'}">${x.type==='income'?'+':'−'}${money(x.amount)}</div></div>`).join('')||'<div class="empty">Aún no hay movimientos.</div>'}
+function renderMoves(){let q=($('search')?.value||'').toLowerCase(),ft=$('filterType')?.value||'';let a=db.moves.filter(x=>(!ft||x.type===ft)&&(!q||(`${x.desc} ${x.category} ${x.sourceName||x.accountName||''}`).toLowerCase().includes(q))).sort((a,b)=>b.created-a.created);$('moves').innerHTML=a.map(x=>`<div class="row"><div><div class="name">${esc(x.desc)}</div><div class="meta">${x.date} · ${esc(x.category)} · ${esc(x.sourceName||x.accountName||'Sin cuenta')}</div></div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end"><span class="amt ${x.type==='income'?'in':'out'}">${x.type==='income'?'+':'−'}${money(x.amount)}</span><button onclick="editMove(${x.id})">✏️ Editar</button><button onclick="deleteMove(${x.id})">🗑️ Eliminar</button></div></div>`).join('')||'<div class="empty">No hay resultados.</div>'}
+function renderAccounts(){$('accounts').innerHTML=db.accounts.map(a=>`<div class="row"><div><div class="name">${esc(a.name)}</div><div class="meta">Saldo disponible · Inicial ${money(a.openingBalance||0)}</div></div><div style="display:flex;gap:8px;align-items:center"><b>${money(a.balance)}</b><button onclick="deleteAccount(${a.id})">🗑️</button></div></div>`).join('')||'<div class="empty">Crea tu primera cuenta.</div>'}
+function renderCards(){$('cardsList').innerHTML=db.cards.map(c=>`<div class="row"><div><div class="name">${esc(c.name)}</div><div class="meta">Límite ${money(c.limit)} · Corte ${c.cut} · Pago ${c.pay}</div></div><div><b>${money(c.balance)}</b><button onclick="deleteCard(${c.id})">🗑️</button></div></div>`).join('')||'<div class="empty">No hay tarjetas registradas.</div>'}
+function renderGoals(){$('goals').innerHTML=db.goals.map(g=>{let p=Math.min(100,Math.round(g.saved/g.target*100));return `<div class="goal"><div class="goalhead"><span>${esc(g.name)}</span><span>${p}%</span></div><div class="progress"><div class="fill" style="width:${p}%"></div></div><div class="small">${money(g.saved)} de ${money(g.target)} <button onclick="addGoal(${g.id})">＋ Aportar</button> <button onclick="deleteGoal(${g.id})">🗑️</button></div></div>`}).join('')||'<div class="empty">Crea una meta de ahorro.</div>';$('goalMini').innerHTML=db.goals.slice(0,3).map(g=>{let p=Math.min(100,Math.round(g.saved/g.target*100));return `<div class="goal"><div class="goalhead"><span>${esc(g.name)}</span><span>${p}%</span></div><div class="progress"><div class="fill" style="width:${p}%"></div></div></div>`}).join('')||'<div class="small">Sin metas todavía.</div>'}
+function renderPayments(){$('payments').innerHTML=db.payments.sort((a,b)=>a.date.localeCompare(b.date)).map(p=>`<div class="row"><div><div class="name">${esc(p.name)}</div><div class="meta">${p.date}</div></div><div><b>${money(p.amount)}</b><button onclick="deletePayment(${p.id})">🗑️</button></div></div>`).join('')||'<div class="empty">No hay pagos programados.</div>'}
+function renderCategories(){let map={};db.moves.filter(x=>x.type==='expense').forEach(x=>map[x.category]=(map[x.category]||0)+x.amount);let arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);$('categories').innerHTML='<h3>Gastos por categoría</h3>'+ (arr.map(x=>`<div class="row"><span>${esc(x[0])}</span><b>${money(x[1])}</b></div>`).join('')||'<div class="empty">Aún no hay gastos.</div>')}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openDialog(title,body,cb){const dlg=$('dlg'),form=$('dlgForm');$('dlgTitle').textContent=title;$('dlgBody').innerHTML=body;dlg.showModal();form.onsubmit=e=>{e.preventDefault();cb();if(dlg.open)dlg.close()}}
+function openMove(){
+  const sourceOptions=`<optgroup label="Cuentas">${db.accounts.map(a=>`<option value="account:${a.id}">${esc(a.name)}</option>`).join('')}</optgroup>${db.cards.length?`<optgroup label="Tarjetas">${db.cards.map(c=>`<option value="card:${c.id}">${esc(c.name)}</option>`).join('')}</optgroup>`:''}`;
+  openDialog('Registrar movimiento',`<div class="form">
+    <input id="fdesc" placeholder="Descripción" required>
+    <input id="famount" type="number" min="1" step="0.01" placeholder="Monto ₡" required>
+    <select id="ftype"><option value="expense">Gasto</option><option value="income">Ingreso</option></select>
+    <select id="fcat"><option>Casa</option><option>Alimentación</option><option>Transporte</option><option>Salud</option><option>Entretenimiento</option><option>Ahorro</option><option>Salario</option><option>Otros</option></select>
+    <select id="fsource">${sourceOptions}</select>
+    <input id="fdate" type="date" value="${new Date().toISOString().slice(0,10)}" required>
+  </div>`,()=>{
+    let [sourceType,sourceId]=fsource.value.split(':'); let amt=Number(famount.value);
+    if(!amt||amt<=0)return; if(sourceType==='card'&&ftype.value==='income'){alert('Un ingreso debe registrarse en una cuenta.');return;}
+    let source=sourceType==='account'?db.accounts.find(x=>x.id==sourceId):db.cards.find(x=>x.id==sourceId); if(!source)return;
+    db.moves.push({id:Date.now(),desc:fdesc.value.trim()||'Movimiento',amount:amt,type:ftype.value,category:fcat.value,sourceType,sourceId:Number(sourceId),sourceName:source.name,date:fdate.value,created:Date.now()});
+    recalcAccounts();save();
+  })
+}
+function openAccount(){openDialog('Nueva cuenta',`<input id="aname" style="width:100%;padding:12px" placeholder="Nombre de la cuenta" required><input id="abal" style="width:100%;padding:12px;margin-top:8px" type="number" min="0" placeholder="Saldo inicial">`,()=>{db.accounts.push({id:Date.now(),name:$('aname').value.trim(),openingBalance:Number($('abal').value)||0,balance:0});recalcAccounts();save()})}
+function openCard(){openDialog('Nueva tarjeta',`<input id="cname" style="width:100%;padding:12px" placeholder="Nombre"><input id="climit" style="width:100%;padding:12px;margin-top:8px" type="number" placeholder="Límite"><input id="cbal" style="width:100%;padding:12px;margin-top:8px" type="number" placeholder="Saldo utilizado"><div style="display:flex;gap:8px;margin-top:8px"><input id="ccut" style="width:50%;padding:12px" placeholder="Día corte"><input id="cpay" style="width:50%;padding:12px" placeholder="Día pago"></div>`,()=>{db.cards.push({id:Date.now(),name:$('cname').value.trim(),limit:Number($('climit').value)||0,openingBalance:Number($('cbal').value)||0,balance:0,cut:$('ccut').value,pay:$('cpay').value});recalcAccounts();save()})}
+function openGoal(){openDialog('Nueva meta',`<input id="gname" style="width:100%;padding:12px" placeholder="Nombre de la meta"><input id="gtarget" style="width:100%;padding:12px;margin-top:8px" type="number" min="1" placeholder="Monto objetivo"><input id="gsaved" style="width:100%;padding:12px;margin-top:8px" type="number" min="0" placeholder="Ya ahorrado">`,()=>{db.goals.push({id:Date.now(),name:gname.value,target:Number(gtarget.value)||1,saved:Number(gsaved.value)||0});save()})}
+function addGoal(id){let g=db.goals.find(x=>x.id===id),v=Number(prompt('¿Cuánto quieres aportar?','10000'));if(g&&v>0){g.saved+=v;save()}}
+function openPayment(){openDialog('Nuevo pago',`<input id="pname" style="width:100%;padding:12px" placeholder="Concepto"><input id="pamount" style="width:100%;padding:12px;margin-top:8px" type="number" placeholder="Monto"><input id="pdate" style="width:100%;padding:12px;margin-top:8px" type="date">`,()=>{db.payments.push({id:Date.now(),name:pname.value,amount:Number(pamount.value)||0,date:pdate.value});save()})}
+function recalcAccounts(){
+  db.accounts.forEach(a=>a.balance=Number(a.openingBalance)||0);
+  db.cards.forEach(c=>c.balance=Number(c.openingBalance)||0);
+  db.moves.forEach(m=>{
+    let sourceType=m.sourceType||'account';
+    let sourceId=m.sourceId;
+    let source=sourceType==='card'?db.cards.find(x=>x.id==sourceId):db.accounts.find(x=>x.id==sourceId);
+    if(!source){
+      source=sourceType==='card'?db.cards.find(x=>x.name===m.sourceName):db.accounts.find(x=>x.name===m.sourceName);
+    }
+    if(!source)return;
+    if(sourceType==='card') source.balance += m.type==='expense'?m.amount:-m.amount;
+    else source.balance += m.type==='income'?m.amount:-m.amount;
+  });
+}
+
+function editMove(id){
+  const m=db.moves.find(x=>x.id===id); if(!m)return;
+  const currentType=m.sourceType||'account';
+  const currentId=m.sourceId;
+  const opts=`<optgroup label="Cuentas">${db.accounts.map(a=>`<option value="account:${a.id}" ${currentType==='account'&&currentId==a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</optgroup>${db.cards.length?`<optgroup label="Tarjetas">${db.cards.map(c=>`<option value="card:${c.id}" ${currentType==='card'&&currentId==c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</optgroup>`:''}`;
+  openDialog('Editar movimiento',`<div class="form">
+    <input id="edesc" value="${esc(m.desc)}" placeholder="Descripción" required>
+    <input id="eamount" type="number" min="1" step="0.01" value="${m.amount}" required>
+    <select id="etype"><option value="expense" ${m.type==='expense'?'selected':''}>Gasto</option><option value="income" ${m.type==='income'?'selected':''}>Ingreso</option></select>
+    <select id="ecat">${['Casa','Alimentación','Transporte','Salud','Entretenimiento','Ahorro','Salario','Otros'].map(c=>`<option ${m.category===c?'selected':''}>${c}</option>`).join('')}</select>
+    <select id="esource">${opts}</select>
+    <input id="edate" type="date" value="${m.date}" required>
+  </div>`,()=>{
+    let [sourceType,sourceId]=esource.value.split(':');
+    if(sourceType==='card'&&etype.value==='income'){alert('Un ingreso debe registrarse en una cuenta.');return;}
+    m.desc=edesc.value.trim()||m.desc; m.amount=Math.max(1,Number(eamount.value)||m.amount); m.type=etype.value; m.category=ecat.value; m.sourceType=sourceType; m.sourceId=Number(sourceId); m.sourceName=sourceType==='card'?db.cards.find(x=>x.id==sourceId).name:db.accounts.find(x=>x.id==sourceId).name; m.date=edate.value||m.date; recalcAccounts();save();
+  });
+}
+
+function deleteMove(id){let m=db.moves.find(x=>x.id===id);if(!m)return;if(!confirm('¿Eliminar este registro? Su efecto en el saldo también será revertido.'))return;db.moves=db.moves.filter(x=>x.id!==id);recalcAccounts();save()}
+function deleteAccount(id){if(db.accounts.length===1)return alert('Debe quedar al menos una cuenta.');if(db.moves.some(m=>(m.sourceType||'account')==='account' && m.sourceId==id))return alert('No puedes eliminar una cuenta que tiene movimientos. Primero edita o elimina esos movimientos.');if(confirm('¿Eliminar esta cuenta?')){db.accounts=db.accounts.filter(x=>x.id!==id);recalcAccounts();save()}}
+function deleteCard(id){if(db.moves.some(m=>m.sourceType==='card'&&m.sourceId==id))return alert('No puedes eliminar una tarjeta que tiene movimientos. Primero edita o elimina esos movimientos.');if(confirm('¿Eliminar tarjeta?')){db.cards=db.cards.filter(x=>x.id!==id);recalcAccounts();save()}}
+function deleteGoal(id){if(confirm('¿Eliminar meta?')){db.goals=db.goals.filter(x=>x.id!==id);save()}}
+function deletePayment(id){if(confirm('¿Eliminar pago?')){db.payments=db.payments.filter(x=>x.id!==id);save()}}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='respaldo_finanzas_aron.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.accounts||!x.moves)throw Error();db=x;save();alert('Respaldo restaurado correctamente.')}catch{alert('El archivo no es un respaldo válido.')}};r.readAsText(f)}
+function resetData(){if(confirm('Esto eliminará todos los datos guardados en este dispositivo. ¿Continuar?')){localStorage.removeItem(KEY);location.reload()}}
+recalcAccounts();
+if(!localStorage.getItem(KEY)){save();}else{renderAll()}
+</script><script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js").catch(()=>{});
+}
+</script></body></html>
